@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Jalan Sang Pemain</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600&family=Barlow+Condensed:wght@700&display=swap">
+<style>
+:root{--bg:#f1f3ea;--card:#fff;--ink:#14251c;--mut:#566a5d;--line:#ccd6c6;--acc:#0f7a43;--on:#fff;--hi:#f2c200;--hit:#2a2000;--bad:#c23b28;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1f18;--card:#173027;--ink:#eef2e6;--mut:#9db3a4;--line:#2d4a3d;--acc:#5fd08a;--on:#08210f;--bad:#ee6a55}}
+:root[data-theme="dark"]{--bg:#0f1f18;--card:#173027;--ink:#eef2e6;--mut:#9db3a4;--line:#2d4a3d;--acc:#5fd08a;--on:#08210f;--bad:#ee6a55}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{margin:0;background:var(--bg)}
+body{color:var(--ink);font:16px/1.45 Barlow,system-ui,sans-serif}
+#app{max-width:520px;margin:0 auto;padding:16px}
+h1,h2{font-family:'Barlow Condensed','Arial Narrow',sans-serif;margin:0;line-height:1.05}
+h1{font-size:36px}h2{font-size:22px;margin:18px 0 8px}
+header{display:flex;gap:16px;align-items:center}
+.y{flex:none;background:var(--hi);color:var(--hit);border-radius:8px;width:64px;height:88px;display:flex;flex-direction:column;align-items:center;justify-content:center;font:700 42px/1 'Barlow Condensed','Arial Narrow',sans-serif;transform:rotate(-4deg)}
+.y small{font:600 13px Barlow,sans-serif}
+.m{color:var(--mut);margin:4px 0 0}
+.c{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin:12px 0}
+.br{display:grid;grid-template-columns:84px 1fr 28px;gap:8px;align-items:center;margin:6px 0;font-size:14px}
+.br i{height:8px;background:var(--line);border-radius:4px;overflow:hidden}
+.br b{display:block;height:100%;background:var(--acc)}
+.br em{font-style:normal;text-align:right;font-weight:600}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.t4{grid-template-columns:repeat(4,1fr)}
+button{font:inherit;font-weight:600;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:11px 12px;min-height:44px;text-align:left;cursor:pointer}
+button span{display:block;font-weight:400;font-size:13px;color:var(--mut)}
+button.p{background:var(--acc);color:var(--on);border-color:var(--acc);text-align:center;width:100%}
+button.w{width:100%;margin:6px 0}
+button.on,.t4 button.on{box-shadow:inset 0 0 0 2px var(--acc);border-color:var(--acc)}
+.t4 button{text-align:center;padding:8px 2px;font-size:14px}
+button:disabled{opacity:.45}
+button:focus-visible,input:focus-visible{outline:3px solid var(--hi);outline-offset:2px}
+input{font:inherit;width:100%;box-sizing:border-box;padding:11px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);margin-top:6px}
+.wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:6px 4px;text-align:right;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left}
+.ev{margin:4px 0;color:var(--mut)}
+</style></head><body><div id="app"></div>
+<script>
+const $=id=>document.getElementById(id),R=(a,b)=>a+Math.floor(Math.random()*(b-a+1)),C=(v,a,b)=>Math.max(a,Math.min(b,v)),P=a=>a[R(0,a.length-1)];
+const esc=s=>s.replace(/[&<>"]/g,c=>'&#'+c.charCodeAt(0)+';');
+const POS={ST:{n:'Penyerang',w:{sho:.35,pac:.2,dri:.2,pas:.1,sta:.1,def:.05},b:{sho:8,pac:4,dri:3,def:-8}},
+W:{n:'Sayap',w:{pac:.3,dri:.3,sho:.15,pas:.15,sta:.1},b:{pac:8,dri:6,def:-8}},
+CM:{n:'Gelandang',w:{pas:.35,dri:.2,sta:.2,def:.15,sho:.1},b:{pas:8,sta:4,def:2}},
+CB:{n:'Bek Tengah',w:{def:.45,pac:.15,sta:.2,pas:.1,dri:.1},b:{def:10,sta:4,sho:-10,dri:-6}}};
+const AT={pac:'Kecepatan',sho:'Tembakan',pas:'Umpan',dri:'Dribel',def:'Bertahan',sta:'Stamina'};
+const TN=['','Liga Top Eropa','Liga Papan Atas Eropa','Liga Eropa Lainnya','Liga 1 Indonesia'];
+const TI=[0,
+{s:82,n:['Manchester City','Real Madrid','Bayern Munich','Paris Saint-Germain','Barcelona','Liverpool','Inter','Arsenal','Atletico Madrid','Bayer Leverkusen','Juventus','AC Milan']},
+{s:72,n:['Borussia Dortmund','Napoli','Chelsea','Tottenham','Atalanta','Roma','Sevilla','Ajax','Benfica','Porto','Sporting CP','Lazio']},
+{s:62,n:['Brighton','Villarreal','Real Sociedad','Fiorentina','Feyenoord','Celtic','Galatasaray','Fenerbahce','PSV','Marseille','Lyon','Monaco']},
+{s:52,n:['Persija Jakarta','Persib Bandung','Arema FC','Persebaya Surabaya','PSM Makassar','Bali United','Borneo FC','Persis Solo','PSIS Semarang','Madura United','Dewa United','Persik Kediri']}];
+const LN=['Silva','Rossi','Keller','Duran','Costa','Bauer','Moreno','Vega','Novak','Santos','Pratama','Weber','Ito','Haddad','Lund'];
+const L=11,RN=['Perempat Final','Semi Final','Final'];
+let S=null,M=null,sel='ST';
+const ovr=()=>Math.round(Object.entries(POS[S.pos].w).reduce((s,[k,w])=>s+S.a[k]*w,0));
+const mkClub=t=>{const i=R(0,11);return {n:TI[t].n[i],t,s:TI[t].s+6-i}};
+const wageFor=(o,t)=>Math.round(o*o/8*[0,4,2.4,1.4,.8][t]*10/100)*100;
+const feeFor=o=>Math.round(Math.pow(o-30,3)*300/1e5)*1e5;
+const fm=n=>'€'+(n>=1e6?(n/1e6).toFixed(1).replace('.',',')+' jt':n>=1e3?Math.round(n/1e3)+' rb':n);
+const avg=a=>a.length?a.reduce((x,y)=>x+y)/a.length:0;
+const role2=(o,s)=>{const d=o-s;return d>-3?'Starter':d>-10?'Rotasi':'Cadangan'};
+const role=()=>role2(ovr()+(S.form-50)/10,S.club.s);
+const save=()=>{try{localStorage.setItem('jsp2',JSON.stringify(S))}catch(e){}};
+const load=()=>{try{return JSON.parse(localStorage.getItem('jsp2'))}catch(e){return null}};
+const ui=h=>{$('app').innerHTML=h;scrollTo(0,0)};
+
+function mkLeague(t,name){const teams=TI[t].n.map((n,i)=>({n,t,s:TI[t].s+6-i,p:0,pts:0,gf:0,ga:0,pl:[0,1,2,3].map(()=>({n:P('ABCDFGHJKLMNRSTV'.split(''))+'. '+P(LN),g:0,a:0}))}));
+const me=teams.findIndex(x=>x.n==name);teams[me].pl.push({n:S.name,g:0,a:0,me:1});return {teams,me}}
+function sched(){let a=[...Array(12).keys()];const o=[];for(let r=0;r<11;r++){const p=[];for(let i=0;i<6;i++)p.push([a[i],a[11-i]]);o.push(p);a.splice(1,0,a.pop())}return o}
+function compFor(){const t=S.club.t;return t==1?(S.rk<=4?'Liga Champions':'Liga Europa'):t==2?'Piala Konferensi':t==3?'Piala Nasional':'Piala Indonesia'}
+function mkKO(){const pool={'Liga Champions':[1],'Liga Europa':[1,2,2],'Piala Konferensi':[2,3],'Piala Nasional':[3],'Piala Indonesia':[4]}[S.comp],o=[];
+while(o.length<3){const c=mkClub(P(pool));if(c.n==S.club.n||o.some(x=>x.n==c.n))continue;o.push({n:c.n,s:c.s})}return o}
+function setupSeason(){S.lg=mkLeague(S.club.t,S.club.n);S.sch=sched();S.comp=compFor();S.ko=[];S.kr=''}
+function opp(){if(S.wk>L)return S.ko[S.wk-L-1];const m=S.lg.me,p=S.sch[S.wk-1].find(x=>x[0]==m||x[1]==m),i=p[0]==m?p[1]:p[0];return {n:S.lg.teams[i].n,s:S.lg.teams[i].s,i}}
+const gg=(a,b)=>Math.max(0,Math.round((a-b)/14+Math.random()*2.4-.2));
+const pick=l=>l[Math.floor(Math.pow(Math.random(),1.6)*l.length)];
+function tab(a,b,x,y){a.p++;b.p++;a.gf+=x;a.ga+=y;b.gf+=y;b.ga+=x;if(x>y)a.pts+=3;else if(x<y)b.pts+=3;else{a.pts++;b.pts++}}
+function sg(t,n){const pl=t.pl.filter(p=>!p.me);for(let i=0;i<n;i++){const s=pick(pl);s.g++;if(Math.random()<.65)P(pl.filter(p=>p!=s)).a++}}
+function rec(a,b,x,y){tab(a,b,x,y);sg(a,x);sg(b,y)}
+const sorted=()=>S.lg.teams.map((t,i)=>({...t,i})).sort((a,b)=>b.pts-a.pts||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf);
+const topL=k=>S.lg.teams.flatMap(t=>t.pl.map(p=>({...p,c:t.n}))).sort((a,b)=>b[k]-a[k]).slice(0,5);
+
+function start(){const sv=load();
+ui(`<h1>Jalan Sang Pemain</h1><p class=m>Mulai dari Liga 1 Indonesia di usia 16. Latih atribut, ambil keputusan di momen penentu, bidik Liga Champions, dan manfaatkan bursa transfer sampai pensiun.</p>
+${sv&&!sv.done?`<button class=p data-a=cont style="margin:14px 0">Lanjutkan ${sv.name}, ${sv.age} tahun</button>`:''}
+<div class=c><label>Nama pemain<input id=nm maxlength=20 placeholder="Contoh: Raka Pratama" autocomplete=off></label>
+<h2>Posisi</h2><div class=g>${Object.keys(POS).map(k=>`<button class="pos${k==sel?' on':''}" data-a="sp:${k}">${POS[k].n}<span>${k}</span></button>`).join('')}</div>
+<button class=p data-a=st style="margin-top:14px">Mulai karier baru</button></div>`)}
+
+function newGame(name,pos){const a={};for(const k in AT)a[k]=R(38,48)+(POS[pos].b[k]||0);const i=R(6,11);
+S={name,pos,age:16,a,pot:R(72,94),club:{n:TI[4].n[i],t:4,s:58-i},energy:100,form:50,wk:1,season:1,inj:0,ctr:2,money:0,tr:0,rk:6,tb:'a',cur:{g:0,as:0,ap:0,r:[]},hist:[],tro:[],peak:0};
+S.peak=ovr();S.wage=wageFor(ovr(),4);setupSeason();S.msg='Selamat datang di Liga 1. Latih dirimu lalu buktikan di lapangan.';save();hub()}
+
+function tbl(){return `<div class="c wrap"><table><tr><th>#</th><th>Klub</th><th>Main</th><th>SG</th><th>Poin</th></tr>${sorted().map((t,i)=>`<tr${t.i==S.lg.me?' style="font-weight:700;color:var(--acc)"':''}><td>${i+1}</td><td>${t.n}</td><td>${t.p}</td><td>${t.gf-t.ga}</td><td>${t.pts}</td></tr>`).join('')}</table></div>`}
+const topT=(k,h)=>`<h2>${h}</h2><div class="c wrap"><table><tr><th>#</th><th>Pemain</th><th>Klub</th><th>${k=='g'?'Gol':'Ast'}</th></tr>${topL(k).map((p,i)=>`<tr${p.me?' style="font-weight:700;color:var(--acc)"':''}><td>${i+1}</td><td>${p.n}</td><td>${p.c}</td><td>${p[k]}</td></tr>`).join('')}</table></div>`;
+function career(){const rows=S.hist.concat(S.cur.ap?[{s:S.season,c:S.club.n,ap:S.cur.ap,g:S.cur.g,as:S.cur.as,av:avg(S.cur.r),rk:'-'}]:[]);
+const T=rows.reduce((a,x)=>({ap:a.ap+x.ap,g:a.g+x.g,as:a.as+x.as}),{ap:0,g:0,as:0});
+return `<div class="c wrap">${rows.length?`<table><tr><th>Musim</th><th>Klub</th><th>Main</th><th>Gol</th><th>Ast</th><th>Rata</th><th>Pos</th></tr>${rows.map(x=>`<tr><td>${x.s}</td><td>${x.c}</td><td>${x.ap}</td><td>${x.g}</td><td>${x.as}</td><td>${x.av.toFixed(1)}</td><td>${x.rk}</td></tr>`).join('')}<tr><td><b>Total</b></td><td></td><td>${T.ap}</td><td>${T.g}</td><td>${T.as}</td><td></td><td></td></tr></table>`:'<p class=m>Belum ada pertandingan.</p>'}${S.tro.length?`<p><b>Trofi dan penghargaan</b><br>${S.tro.join('<br>')}</p>`:''}<p class=m>Total pendapatan ${fm(S.money)}</p></div>`}
+
+const br=(l,v,x)=>`<div class=br><span>${l}</span><i><b style="width:${v}%${x||''}"></b></i><em>${Math.round(v)}</em></div>`;
+function hub(){const o=opp(),ov=ovr(),r=role(),m=S.msg;S.msg='';
+const lbl=S.wk<=L?`Liga, pekan ${S.wk} dari ${L}`:`${S.comp}, ${RN[S.wk-L-1]}`;
+const tb=S.tb,tabs=[['a','Atribut'],['k','Klasemen'],['s','Top skor'],['r','Riwayat']];
+ui(`<header><div class=y>${ov}<small>${S.pos}</small></div><div><h1>${S.name}</h1><p class=m>${POS[S.pos].n}, ${S.age} tahun, ${S.club.n}<br>${TN[S.club.t]}, kontrak ${S.ctr} musim, ${fm(S.wage)}/pekan</p></div></header>
+${m?`<div class=c>${m}</div>`:''}
+<div class=c><b>${lbl}</b><p class=m>Lawan: ${o.n}, kekuatan ${o.s}. Timmu ${S.club.s}.<br>Perananmu: <b>${S.inj?'cedera, absen '+S.inj+' laga':r}</b></p>
+<button class=p data-a=go>${S.inj?'Lewati pekan (cedera)':'Main pertandingan'}</button></div>
+<div class=c>${br('Energi',S.energy,S.energy<30?';background:var(--bad)':'')}${br('Performa',S.form)}</div>
+<h2>Latihan pekan ini</h2><div class=g>${Object.keys(AT).map(k=>`<button data-a="tr:${k}" ${S.tr||S.inj?'disabled':''}>${AT[k]}<span>${S.a[k]}, energi -25</span></button>`).join('')}<button data-a="tr:rest" ${S.tr?'disabled':''}>Istirahat<span>energi +45</span></button></div>
+<div class="g t4" style="margin-top:18px">${tabs.map(([k,n])=>`<button class="${k==tb?'on':''}" data-a="tab:${k}">${n}</button>`).join('')}</div>
+${tb=='a'?`<div class=c>${Object.keys(AT).map(k=>br(AT[k],S.a[k])).join('')}<p class=m>Potensimu tersembunyi. Makin muda, makin cepat berkembang.</p></div>`:tb=='k'?`<p class=m style="margin-top:12px">${TN[S.club.t]}, ${S.club.n}</p>${tbl()}`:tb=='s'?topT('g','Top skor')+topT('a','Top assist'):career()}`)}
+
+const A={
+sp(k){sel=k;document.querySelectorAll('.pos').forEach(b=>b.classList.toggle('on',b.dataset.a=='sp:'+k))},
+st(){newGame(esc($('nm').value.trim()||'Pemain Muda'),sel)},
+cont(){S=load();S.wk>L+3&&S.sum&&!S.done?season():S.done?start():hub()},
+tab(x){S.tb=x;hub()},
+tr(k){if(S.tr||(S.inj&&k!='rest'))return;
+if(k=='rest'){S.energy=C(S.energy+45,0,100);S.msg='Kamu beristirahat. Energi pulih.'}
+else if(S.energy<25){S.msg='Energi terlalu rendah. Istirahat dulu.';return hub()}
+else{const p=S.age<=21?.8:S.age<=27?.55:.3;
+if(S.a[k]<S.pot+3&&Math.random()<p){const g=R(1,2);S.a[k]=C(S.a[k]+g,0,99);S.msg=`Latihan ${AT[k]} berhasil: +${g}.`}else S.msg=`Latihan ${AT[k]}: belum ada kemajuan.`;
+S.energy-=25}
+S.tr=1;save();hub()},
+go(){const o=opp(),r=role();M={o,g:0,as:0,d:0,f:0,rt:6,ev:[],i:0};
+if(S.inj>0){S.inj--;M.mins=[];M.out='Kamu absen karena cedera.'}
+else{const n=r=='Starter'?4:r=='Rotasi'?(Math.random()<.5?4:2):(Math.random()<.5?1:0);M.mins=[22,41,63,82].slice(4-n);if(!n)M.out='Kamu duduk di bangku cadangan.'}
+nx()},
+pk(i){const [k]=M.ch[i],a=S.a[k]-(S.energy<30?8:0);
+const p=C(.3+(a-50)/110+(S.form-50)/400-(M.o.s-S.club.s)/120,.1,.88);
+const ok=Math.random()<p*(M.t?[.8,.95,.9]:[.95,.95,.9])[i];let t,d;
+if(M.t){
+if(i==0){if(ok){M.g++;d=1.3;t='GOL! Tembakanmu bersarang di gawang.'}else{d=Math.random()<.4?.1:-.3;t=d>0?'Dihalau kiper, nyaris.':'Tembakan melebar.'}}
+else if(i==1){if(ok){if(Math.random()<.6){M.as++;d=1;t='ASSIST! Rekanmu mencetak gol.'}else{d=.5;t='Umpan bagus, tapi peluang tidak dimanfaatkan.'}}else{d=-.4;t='Umpanmu terpotong lawan.'}}
+else{if(ok){if(Math.random()<.45){M.g++;d=1.2;t='GOL! Kamu lewati bek lalu menaklukkan kiper.'}else{d=.6;t='Bek terlewati, peluang tercipta.'}}else{d=-.4;t='Bola direbut bek lawan.'}}
+}else{if(ok){M.d++;d=.7;t='Berhasil! Serangan lawan dipatahkan.'}else{M.f++;d=-.5;t=i==0&&Math.random()<.3?'Pelanggaran dan kartu kuning.':'Terlambat, lawan lolos.'}}
+M.rt+=d;M.ev.push(M.mins[M.i]+'’ '+t);M.i++;
+ui(`<h1>Menit ${M.mins[M.i-1]}’</h1><div class=c><b>${t}</b></div><button class=p data-a=nx>Lanjut</button>`)},
+nx,hub,es:endSeason,
+stay(){S.wage=wageFor(ovr(),S.club.t);nextSeason()},
+move(i){const x=S.sum.offers[i];S.club=x.c;S.ctr=x.y;S.wage=x.w;nextSeason()},
+neg(i){const x=S.sum.offers[i];if(x.neg)return;x.neg=1;if(Math.random()<.5)x.w=Math.round(x.w*1.2/100)*100;else S.sum.offers.splice(i,1);save();season()},
+ret(){S.done=1;save();finish()},
+nw(){try{localStorage.removeItem('jsp2')}catch(e){}start()}
+};
+function nx(){if(M.i>=M.mins.length)return fin();
+M.t=Math.random()<({ST:.85,W:.8,CM:.6,CB:.25})[S.pos];
+M.ch=M.t?[['sho','Tembak langsung','Ambil risiko dari jarak dekat'],['pas','Umpan terobosan','Cari rekan yang lepas'],['dri','Tusuk lewati bek','Adu satu lawan satu']]:[['def','Tekel keras','Hentikan lawan langsung'],['pac','Kejar dan tutup ruang','Andalkan kecepatan'],['pas','Bangun serangan dari belakang','Rebut dan kirim bola cepat']];
+ui(`<h1>Menit ${M.mins[M.i]}’</h1><p class=m>${S.club.n} melawan ${M.o.n}</p><div class=c>${M.t?'Bola datang ke kakimu di sepertiga akhir lapangan.':'Lawan melancarkan serangan berbahaya ke gawangmu.'}</div>${M.ch.map((c,i)=>`<button class=w data-a="pk:${i}">${c[1]}<span>${c[2]}, ${AT[c[0]]} ${S.a[c[0]]}</span></button>`).join('')}`)}
+
+function fin(){const ts=S.club.s,os=M.o.s,pl=M.mins.length>0,ko=S.wk>L,T=S.lg.teams,m=S.lg.me;
+let og=Math.max(0,Math.round((os-ts)/14+Math.random()*2.2-.3)),us=Math.max(0,Math.round((ts-os)/14+Math.random()*2.2-.1))+M.g+M.as;
+if(M.d>=2)og=Math.max(0,og-1);if(M.f>=2)og++;
+let res=us>og?'M':us<og?'K':'S',pen='';
+if(ko&&res=='S'){const w=Math.random()<.5+(ts-os)/100;res=w?'M':'K';pen=` (adu penalti: ${w?'menang':'kalah'})`}
+let rt=0,inj=0;
+if(pl){rt=Math.round(C(M.rt+(res=='M'?.3:res=='K'?-.3:0)+(S.pos=='CB'&&og==0?.4:0),3,10)*10)/10;
+S.cur.ap++;S.cur.g+=M.g;S.cur.as+=M.as;S.cur.r.push(rt);S.form=C(S.form+(rt-6.5)*8,10,95);
+S.energy=C(S.energy-(M.mins.length>2?20:8),0,100);
+if(Math.random()<(S.energy<30?.14:.04)){S.inj=R(1,3);inj=1}}
+else S.energy=C(S.energy+10,0,100);
+if(!ko){const o=T[M.o.i],me=T[m].pl.find(p=>p.me),oth=T[m].pl.filter(p=>!p.me);
+tab(T[m],o,us,og);sg(o,og);
+for(let i=0;i<us-M.g;i++){const s=pick(oth);s.g++;if(i<M.as)me.a++;else if(Math.random()<.65)P(oth.filter(p=>p!=s)).a++}
+me.g+=M.g;
+S.sch[S.wk-1].forEach(([a,b])=>{if(a!=m&&b!=m)rec(T[a],T[b],gg(T[a].s,T[b].s),gg(T[b].s,T[a].s))})}
+else if(res=='K'){S.kr='Tersingkir di '+RN[S.wk-L-1];S.wk=L+3}
+else if(S.wk==L+3){S.kr='Juara '+S.comp;S.tro.push(`${S.comp}, musim ${S.season} (${S.club.n})`)}
+else S.kr='Lolos ke '+RN[S.wk-L];
+S.wk++;S.tr=0;
+let note='';
+if(S.wk==L+1){S.ko=mkKO();note=`Liga selesai di posisi ${sorted().findIndex(x=>x.i==m)+1}. Lanjut ke ${S.comp}.`}
+save();
+ui(`<h1>${res=='M'?'Menang':res=='K'?'Kalah':'Seri'}</h1><div class=c><b>${S.club.n} ${us} - ${og} ${M.o.n}${pen}</b>${pl?`<p>Rating <b>${rt.toFixed(1)}</b>, gol ${M.g}, assist ${M.as}</p>`:`<p class=m>${M.out}</p>`}${M.ev.map(e=>`<p class=ev>${e}</p>`).join('')}${inj?`<p style="color:var(--bad)">Kamu cedera dan absen ${S.inj} laga.</p>`:''}${ko&&S.kr?`<p><b>${S.kr}</b></p>`:''}${note?`<p>${note}</p>`:''}</div><button class=p data-a="${S.wk>L+3?'es':'hub'}">${S.wk>L+3?'Lihat akhir musim':'Lanjut'}</button>`)}
+
+function endSeason(){const c=S.cur,av=avg(c.r),tr=[],rk=sorted().findIndex(x=>x.i==S.lg.me)+1;
+if(rk==1)tr.push('Juara '+TN[S.club.t]);
+if(topL('g')[0].me&&c.g>0)tr.push('Top skor liga');
+if(topL('a')[0].me&&c.as>0)tr.push('Top assist liga');
+if(av>=7.6&&c.ap>=6)tr.push('Pemain terbaik musim ini');
+tr.forEach(t=>S.tro.push(`${t}, musim ${S.season} (${S.club.n})`));
+S.hist.push({s:S.season,c:S.club.n,ap:c.ap,g:c.g,as:c.as,av,rk});S.rk=rk;
+S.money+=S.wage*38;S.age++;S.ctr--;
+const b={...S.a};
+for(const k in AT){let d;const y=S.age,f=k=='pac'||k=='sta';
+if(y<=21)d=R(0,3);else if(y<=27)d=R(0,1);else if(y<=31)d=f?-R(0,1):R(-1,1)*(Math.random()<.4);else d=-R(0,f?2:1);
+if(d>0&&S.a[k]>=S.pot+3)d=0;S.a[k]=C(S.a[k]+d,20,99)}
+const o=ovr();S.peak=Math.max(S.peak,o);
+let t=o>=76?1:o>=66?2:o>=56?3:4;if(av>=7.4||rk<=3)t=Math.max(1,t-1);
+const L2=[],seen=new Set([S.club.n]);
+if(S.ctr<=0)L2.push({c:S.club,y:R(1,3),w:wageFor(o,S.club.t),renew:1});
+let n=0;for(const tt of [t,t,t+1,t-1,t]){if(tt<1||tt>4||(n>=2&&Math.random()<.3))continue;const cl=mkClub(tt);if(seen.has(cl.n))continue;seen.add(cl.n);L2.push({c:cl,y:R(1,4),w:wageFor(o,tt),fee:feeFor(o)*[0,3,1.8,1,.4][tt]});if(++n>=4)break}
+S.sum={avg:av,tr,rk,kr:S.kr,d:Object.keys(AT).map(k=>[k,S.a[k]-b[k]]).filter(x=>x[1]),offers:L2};
+save();season()}
+
+function season(){const m=S.sum,o=ovr(),f=S.age>=38,c=S.cur;
+ui(`<h1>Akhir musim ${S.season}</h1><p class=m>Liga: peringkat ${m.rk} dari 12. ${S.comp}: ${m.kr||'tidak lolos'}.<br>Rata-rata rating ${m.avg.toFixed(1)}, ${c.g} gol, ${c.as} assist</p>
+${m.tr.length?`<div class=c><b>Penghargaan</b><br>${m.tr.join('<br>')}</div>`:''}
+<div class=c><b>Perkembangan memasuki usia ${S.age}</b><br>${m.d.length?m.d.map(([k,v])=>`${AT[k]} ${v>0?'+':''}${v}`).join(', '):'Tidak ada perubahan.'}</div>
+${f?'<p class=m>Di usia ini tubuhmu sudah tidak sanggup lagi. Saatnya pensiun.</p>':'<h2>Bursa transfer</h2><p class=m>Nilai pasarmu '+fm(feeFor(o)*1.5)+'. Klub yang berminat:</p>'+(S.ctr>0?`<button class=w data-a=stay>Tetap di ${S.club.n}<span>Kontrak sisa ${S.ctr} musim, gaji ${fm(wageFor(o,S.club.t))}/pekan</span></button>`:'')+m.offers.map((x,i)=>`<div class=c style="margin:8px 0"><b>${x.renew?'Perpanjang di ':'Tawaran dari '}${x.c.n}</b><p class=m>${TN[x.c.t]}, ${x.y} musim, ${fm(x.w)}/pekan, peran: ${role2(o,x.c.s)}${x.fee?'<br>Biaya transfer '+fm(x.fee):''}</p><div class=g><button data-a="move:${i}">${x.renew?'Perpanjang':'Pindah'}</button><button data-a="neg:${i}" ${x.neg||x.renew?'disabled':''}>Minta gaji naik<span>+20%, berisiko batal</span></button></div></div>`).join('')}
+${S.age>=33?`<button class=w data-a=ret style="margin-top:12px">Gantung sepatu${f?'':' sekarang'}</button>`:''}`)}
+
+function nextSeason(){S.season++;S.wk=1;S.cur={g:0,as:0,ap:0,r:[]};S.energy=100;S.form=55;S.inj=0;S.tr=0;S.sum=null;setupSeason();S.msg=`Musim baru dimulai. Kompetisi musim ini: ${TN[S.club.t]} dan ${S.comp}.`;save();hub()}
+
+function finish(){const T=S.hist.reduce((a,x)=>({ap:a.ap+x.ap,g:a.g+x.g,as:a.as+x.as,r:a.r.concat(x.ap?[x.av]:[])}),{ap:0,g:0,as:0,r:[]});
+const t=S.tro.length>=5?'Legenda Sepak Bola':S.peak>=80?'Pemain Bintang':S.peak>=65?'Pemain Profesional':'Pemain Perjuangan';
+ui(`<h1>${S.name} pensiun</h1><p class=m>${t}, pensiun di usia ${S.age}</p><div class=c><b>Statistik karier</b><br>${T.ap} laga, ${T.g} gol, ${T.as} assist<br>Rata-rata rating ${avg(T.r).toFixed(1)}<br>Rating tertinggi ${S.peak}<br>Total pendapatan ${fm(S.money)}</div>${S.tro.length?`<div class=c><b>Trofi dan penghargaan</b><br>${S.tro.join('<br>')}</div>`:''}<button class=p data-a=nw>Mulai karier baru</button>`)}
+
+document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b)return;const [f,x]=b.dataset.a.split(':');if(A[f])A[f](x)});
+start();
+</script></body></html>
